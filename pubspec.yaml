@@ -79,6 +79,10 @@ flutter:
      - images/Hossam Ghaly.jpg
      - images/abdelhalem.jpg
      - images/Reda.jpg
+     - images/zakaria.jpg
+     - images/mohnd.jpg
+     - images/ghazawy.jpg
+     - images/ghalyy.jpeg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

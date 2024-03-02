@@ -33,7 +33,7 @@ class member extends StatelessWidget {
                       height: 80,
                       width: 400,
                       alignment: Alignment.center,
-                      child: const Text("Member",
+                      child: const Text("Member Candidates",
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 25.0,
@@ -43,12 +43,12 @@ class member extends StatelessWidget {
                       width: 300,
                       height: 300,
                       child: Image.asset(
-                        "images/Hossam Ghaly.jpg",
+                        "images/ghalyy.jpeg",
                       )),
                   Container(
                       height: 50,
                       alignment: Alignment.center,
-                      child: const Text("1. hossam ghaly",
+                      child: const Text("1. Hossam Ghaly",
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 25.0,
@@ -125,6 +125,115 @@ class member extends StatelessWidget {
                       height: 50,
                       alignment: Alignment.center,
                       child: const Text("3. Reda Abdelaal",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      alignment: Alignment.topCenter,
+                      child: const Text("INFO:",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      width: 340,
+                      alignment: Alignment.center,
+                      child: const Text(
+                          "هو لاعب كرة يد مصري سابق، التحق بنادي الزمالك في عام 1968 حيث كان عمره 13 عامًا، حقق حسين لبيب 21 بطولة مع نادي الزمالك، و7 بطولات في الدوري المصري المحترفين لكرة اليد، و9 بطولات في كأس مصر، و5 بطولات أفريقية.",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 23.0,
+                            fontWeight: FontWeight.w600,
+                          ))),
+                  Container(
+                      width: 300,
+                      height: 300,
+                      child: Image.asset(
+                        "images/zakaria.jpg",
+                      )),
+                  Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      child: const Text("4. Mohamed Serag",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      alignment: Alignment.center,
+                      child: const Text("INFO:",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      alignment: Alignment.topCenter,
+                      width: 340,
+                      child: const Text(
+                          "و من مواليد 3 يونيو 1986 بمحافظة القاهرة حي المعادي وتخرج من مدارس ڤكتوريا كوليدچ بالمعادي ثم التحق بـالجامعة الأمريكية بالقاهرة عام 2004 بكلية هندسة الإنشاءات ثم بعد تخرجه استكمل دراسات عليا بالجامعة الأمريكية بالقاهرة وعمل كمعيد بقسم هندسة الإنشاءات إلى ان أنهى رسالة الماچيستير الخاصة به بدرجة امتياز مع مرتبة الشرف وإرتقى لمنصب مدرس مساعد بالجامعة وفي نفس الوقت يشغل منصب العضو المنتدب لمجموعات شركات العربية للتنمية الصناعية وهي شركة مساهمة عائلية تعمل بالسوق المصري والعربي منذ أكثر من ثلاثون عاماً.",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 23.0,
+                            fontWeight: FontWeight.w600,
+                          ))),
+                  Container(
+                      alignment: Alignment.topCenter,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+                      ),
+                      width: 300,
+                      height: 300,
+                      child: Image.asset(
+                        fit: BoxFit.fill,
+                        "images/mohnd.jpg",
+                        width: 300,
+                        height: 300,
+                      )),
+                  Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      child: const Text("5. Mohand Magdy",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      alignment: Alignment.topCenter,
+                      child: const Text("INFO:",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w800,
+                          ))),
+                  Container(
+                      width: 340,
+                      alignment: Alignment.center,
+                      child: const Text(
+                          "لاعب الكاراتيه السابق وطبيب الأسنان مهند مجدي يبلغ من العمر تسعة وثلاثون عاما في الوقت الحالي، حيث ولد في الإمارات العربية المتحدة في السابع عشر من شهر مايو عام الف وتسعمائة أربعة وثمانون ميلادي، وبعد أن أمضى ستة عشر عاما من الطفولة مع عائلته، اعتزل مجدي الكاراتيه في عام الفين وأربعة عشر ميلادي  وفاز بنجاح في انتخابات مجلس إدارة النادي الأهلي بقيادة محمود طاهر، وانضم إلى قائمة الأهلي في عام الفين وثمانية عشر ميلادي، والانتخابات قبل النجاح مرة أخرى ليصبح أصغر مدير مواطن من حيث العمر.",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 23.0,
+                            fontWeight: FontWeight.w600,
+                          ))),
+                  Container(
+                      width: 300,
+                      height: 300,
+                      child: Image.asset(
+                        fit: BoxFit.fill,
+                        "images/ghazawy.jpg",
+                        width: 300,
+                        height: 300,
+                      )),
+                  Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      child: const Text("6. Mohamed Elghazawy",
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 25.0,

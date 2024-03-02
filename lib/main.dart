@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:learn/about.dart';
+import 'package:learn/chat.dart';
 
 import 'package:learn/vote.dart';
 
@@ -92,7 +93,8 @@ class MyApp extends StatelessWidget {
                       minWidth: 325,
                       height: 62,
                       onPressed: () {
-                        print("aliashraf");
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => VotingScreen()));
                       },
                       child: const Text("Show Result",
                           style: TextStyle(

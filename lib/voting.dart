@@ -120,6 +120,7 @@ class voting extends StatelessWidget {
                           )
                         ],
                       )),
+
                   Container(
                       width: 300,
                       height: 300,
@@ -262,6 +263,52 @@ class voting extends StatelessWidget {
                           )
                         ],
                       )),
-                ]))));
+                  Container(
+                      height: 100,
+                      child: Column(
+                        children: [
+                          MaterialButton(
+                            color: const Color(0xFF00B0FF),
+                            minWidth: 150,
+                            height: 50,
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text("warning"),
+                                      content: Text("Are you sure"),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MyApp()));
+                                            },
+                                            child: Text("Ok")),
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Cancel"))
+                                      ],
+                                    );
+                                  });
+                            },
+                            child: const Text("Submit",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  fontSize: 23.0,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                          )
+                        ],
+                      )),
+                ]
+                )
+                )
+                )
+                );
   }
 }
