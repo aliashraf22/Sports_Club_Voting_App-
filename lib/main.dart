@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:learn/about.dart';
 import 'package:learn/chat.dart';
-
-import 'package:learn/vote.dart';
-
 import 'package:learn/getstart.dart';
+import 'package:learn/network/network_client.dart';
+import 'package:learn/vote.dart';
 
 void main() {
   runApp(
@@ -16,10 +16,11 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    HttpOverrides.global = DevHttpOverrides();
     return MaterialApp(
         home: Scaffold(
             appBar: AppBar(
-               toolbarHeight: 47,
+                toolbarHeight: 47,
                 title: const Text("Votage"),
                 centerTitle: true,
                 backgroundColor: const Color(0xFF00B0FF),
