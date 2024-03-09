@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:learn/login.dart';
-import 'package:learn/main.dart';
+import 'package:learn/home_page.dart';
+import 'package:learn/login_page.dart';
 
-
-
-
-class signup extends StatelessWidget {
-  const signup({super.key});
+class SignupPage extends StatelessWidget {
+  const SignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-           toolbarHeight: 47,
+    return Scaffold(
+      appBar: AppBar(
+          toolbarHeight: 47,
           title: const Text("Votage"),
           centerTitle: true,
           backgroundColor: const Color(0xFF00B0FF),
           titleTextStyle: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                    fontSize: 32.0,
-                    fontWeight: FontWeight.w500)
-        ),
-        body: const FormExample(),
-      ),
+              color: Color.fromARGB(255, 0, 0, 0),
+              fontSize: 32.0,
+              fontWeight: FontWeight.w500)),
+      body: const FormExample(),
     );
   }
 }
@@ -148,9 +142,10 @@ class _FormExampleState extends State<FormExample> {
               height: 62,
               textColor: Colors.white,
               onPressed: () {
-                if (_formKey.currentState!.validate())
-                {Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) =>  MyApp()));}
+                if (_formKey.currentState!.validate()) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HomePage()));
+                }
               },
               child: const Text(
                 'Register',
@@ -160,7 +155,7 @@ class _FormExampleState extends State<FormExample> {
           TextButton(
             onPressed: () {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const login()));
+                  MaterialPageRoute(builder: (context) => const LoginPage()));
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
