@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:learn/config/user_config.dart';
 import 'package:learn/home_page.dart';
@@ -25,7 +27,7 @@ class _VotingPageState extends State<VotingPage> {
   @override
   void initState() {
     super.initState();
-    // _startTimer();
+    _startTimer();
 
     _candidateTypes =
         widget.candidates.map((candidate) => candidate.type).toSet().toList();
@@ -165,13 +167,36 @@ class _VotingPageState extends State<VotingPage> {
     );
   }
 
+  void voteForCandidate(
+      BuildContext context, CandidateModel candidate, int? page) async {
+    // Update the candidate's vote count and voters list
+    updateCandidateVote(candidate);
+
+    // Update the user's voting choice
+    updateUserVotingChoice(
+        UserConfig.userModel?.docId, candidate.type, candidate.id);
+
+    updateUserHasVoted(UserConfig.userModel?.docId);
+
+    // Navigate to the next candidate type or finish voting
+    if ((page ?? 0) >= _candidateTypes.length - 1) {
+      // This is the last candidate type, navigate to the HomePage or a voting completion page
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const HomePage()));
+    } else {
+      // There are more candidate types to vote for, proceed to the next page
+      _pageController.nextPage(
+          duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+    }
+  }
+
   Future<void> updateCandidateVote(CandidateModel candidate) async {
     final candidateRef =
         FirebaseFirestore.instance.collection('candidates').doc(candidate.id);
     final newVoteCount = (candidate.numberOfVotes ?? 0) + 1;
     final List<String> newVotersUserIds =
         List.from(candidate.votersUserIds ?? [])
-          ..add(UserConfig.userModel?.userId ?? '');
+          ..add(_hashUserId(UserConfig.userModel?.userId ?? ''));
 
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -184,6 +209,12 @@ class _VotingPageState extends State<VotingPage> {
     } catch (e) {
       log("Error updating vote: $e");
     }
+  }
+
+  String _hashUserId(String userId) {
+    var bytes = utf8.encode(userId);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   Future<void> updateUserVotingChoice(
@@ -231,26 +262,5 @@ class _VotingPageState extends State<VotingPage> {
     }
   }
 
-  void voteForCandidate(
-      BuildContext context, CandidateModel candidate, int? page) async {
-    // Update the candidate's vote count and voters list
-    updateCandidateVote(candidate);
 
-    // Update the user's voting choice
-    updateUserVotingChoice(UserConfig.userModel?.docId,
-        candidate.type?.splitMapJoin(' ').toLowerCase(), candidate.id);
-
-    updateUserHasVoted(UserConfig.userModel?.docId);
-
-    // Navigate to the next candidate type or finish voting
-    if ((page ?? 0) >= _candidateTypes.length - 1) {
-      // This is the last candidate type, navigate to the HomePage or a voting completion page
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
-    } else {
-      // There are more candidate types to vote for, proceed to the next page
-      _pageController.nextPage(
-          duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-    }
-  }
 }
