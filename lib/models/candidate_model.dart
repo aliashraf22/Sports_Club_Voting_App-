@@ -6,7 +6,6 @@ class CandidateModel {
     this.type,
     this.info,
     this.numberOfVotes,
-    this.votersUserIds,
   });
 
   factory CandidateModel.fromFirestore(DocumentSnapshot doc) {
@@ -16,7 +15,6 @@ class CandidateModel {
       type: data['type'] ?? '',
       info: Info.fromJson(data['info']),
       numberOfVotes: data['numberOfVotes'] ?? 0,
-      votersUserIds: data['votersUserIds'] ?? [],
     );
   }
 
@@ -24,7 +22,6 @@ class CandidateModel {
   String? type;
   Info? info;
   int? numberOfVotes;
-  List? votersUserIds;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -33,7 +30,6 @@ class CandidateModel {
       map['info'] = info?.toJson();
     }
     map['numberOfVotes'] = numberOfVotes;
-    map['votersUserIds'] = votersUserIds;
     return map;
   }
 }

@@ -15,7 +15,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,10 +22,10 @@ class _HomePageState extends State<HomePage> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('users').snapshots(),
         builder: (context, snapshot) {
-          if(snapshot.hasData && snapshot.data!.docs.isNotEmpty){
-
-            UserConfig.setUserModel(
-                UserModel.fromFirestore(snapshot.data!.docs.first));
+          if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+            UserConfig.setUserModel(UserModel.fromFirestore(snapshot.data!.docs
+                .where((user) =>user['userId'] == UserConfig.userModel?.userId)
+                .first));
           }
 
           return StreamBuilder<QuerySnapshot>(

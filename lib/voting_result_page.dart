@@ -10,7 +10,7 @@ class VotingResultPage extends StatefulWidget {
 }
 
 class _VotingResultPageState extends State<VotingResultPage> {
-  late Map<String, CandidateModel> highestVotedCandidates;
+  Map<String, CandidateModel>? highestVotedCandidates;
 
   @override
   void initState() {
@@ -37,20 +37,22 @@ class _VotingResultPageState extends State<VotingResultPage> {
               color: Color.fromARGB(255, 0, 0, 0),
               fontSize: 32.0,
               fontWeight: FontWeight.w600)),
-      body: ListView.builder(
-        itemCount: highestVotedCandidates.length,
-        itemBuilder: (context, index) {
-          String category = highestVotedCandidates.keys.elementAt(index);
-          CandidateModel candidate = highestVotedCandidates[category]!;
-          return ListTile(
-            leading: Image.network(candidate.info?.imageUrl ?? '',
-                width: 100, fit: BoxFit.cover),
-            title: Text('${candidate.info?.name} - ${candidate.type}'),
-            subtitle: Text(
-                'Votes: ${candidate.numberOfVotes}'),
-          );
-        },
-      ),
+      body: highestVotedCandidates != null
+          ? ListView.builder(
+              itemCount: highestVotedCandidates?.length,
+              itemBuilder: (context, index) {
+                String? category =
+                    highestVotedCandidates?.keys.elementAt(index);
+                CandidateModel candidate = highestVotedCandidates![category]!;
+                return ListTile(
+                  leading: Image.network(candidate.info?.imageUrl ?? '',
+                      width: 100, fit: BoxFit.cover),
+                  title: Text('${candidate.info?.name} - ${candidate.type}'),
+                  subtitle: Text('Votes: ${candidate.numberOfVotes}'),
+                );
+              },
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 

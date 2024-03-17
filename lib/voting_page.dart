@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:learn/config/user_config.dart';
 import 'package:learn/home_page.dart';
@@ -155,7 +153,39 @@ class _VotingPageState extends State<VotingPage> {
                             content: const Text("Are you sure?"),
                             actions: [
                               TextButton(
-                                onPressed: () {},
+                                onPressed: ()  {
+                                  Navigator.pop(
+                                      context); // Close the dialog first
+
+                                  // Assuming updateCandidateVote and updateUserVotingChoice are async methods
+                                  // that update your Firestore database with the new vote counts and choices
+                                  for (String candidateType
+                                      in _selectedCandidates.keys) {
+                                    String? candidateId =
+                                        _selectedCandidates[candidateType];
+                                    if (candidateId != null) {
+                                      // Find the candidate model from the list of candidates using the candidateId
+                                      CandidateModel? candidate =
+                                          widget.candidates.first;
+
+                                      // Update the candidate's vote count
+                                       updateCandidateVote(candidate);
+                                    }
+                                  }
+
+                                  // Mark the user as having voted
+                                   updateUserHasVoted(
+                                      UserConfig.userModel?.docId);
+
+                                  if (page  >= _candidateTypes.length - 1) {
+                                    // This is the last candidate type, navigate to the HomePage or a voting completion page
+                                    _navigateToHomePage();
+                                  } else {
+                                    // There are more candidate types to vote for, proceed to the next page
+                                    _pageController.nextPage(
+                                        duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+                                  }
+                                },
                                 child: const Text("Ok"),
                               ),
                               TextButton(
@@ -242,10 +272,6 @@ class _VotingPageState extends State<VotingPage> {
     // Update the candidate's vote count and voters list
     updateCandidateVote(candidate);
 
-    // Update the user's voting choice
-    updateUserVotingChoice(
-        UserConfig.userModel?.docId, candidate.type, candidate.id);
-
     updateUserHasVoted(UserConfig.userModel?.docId);
 
     // Navigate to the next candidate type or finish voting
@@ -263,52 +289,16 @@ class _VotingPageState extends State<VotingPage> {
     final candidateRef =
         FirebaseFirestore.instance.collection('candidates').doc(candidate.id);
     final newVoteCount = (candidate.numberOfVotes ?? 0) + 1;
-    final List<String> newVotersUserIds =
-        List.from(candidate.votersUserIds ?? [])
-          ..add(_hashUserId(UserConfig.userModel?.userId ?? ''));
 
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         transaction.update(candidateRef, {
           'numberOfVotes': newVoteCount,
-          'votersUserIds': newVotersUserIds,
         });
       });
       log("Vote updated successfully");
     } catch (e) {
       log("Error updating vote: $e");
-    }
-  }
-
-  String _hashUserId(String userId) {
-    var bytes = utf8.encode(userId);
-    var digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-
-  Future<void> updateUserVotingChoice(
-      String? usersDocId, String? candidateType, String? candidateId) async {
-    final userRef =
-        FirebaseFirestore.instance.collection('users').doc(usersDocId);
-
-    try {
-      // Fetch the current user document
-      final doc = await userRef.get();
-      if (doc.exists) {
-        Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
-        // Get the current votingChoices map, or initialize it if it doesn't exist
-        Map votingChoices = userData['votingChoices'] ?? {};
-        // Update the specific candidate type with the new candidate ID
-        votingChoices[candidateType] = candidateId;
-
-        // Update the user document with the modified votingChoices map
-        await userRef.update({
-          'votingChoices': votingChoices,
-        });
-        log("User voting choice updated successfully");
-      }
-    } catch (e) {
-      log("Error updating user voting choice: $e");
     }
   }
 
