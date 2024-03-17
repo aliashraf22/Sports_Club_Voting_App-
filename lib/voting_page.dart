@@ -21,6 +21,7 @@ class VotingPage extends StatefulWidget {
 class _VotingPageState extends State<VotingPage> {
   final PageController _pageController = PageController();
   late List<String?> _candidateTypes;
+  final Map<String, String> _selectedCandidates = {};
   Timer? _timer;
   int _start = 300; // 300 seconds for 5 minutes
 
@@ -39,8 +40,9 @@ class _VotingPageState extends State<VotingPage> {
         setState(() {
           timer.cancel();
           updateUserHasVoted(UserConfig.userModel?.docId);
-          Navigator.of(context).pop(); // Navigate back when timer reaches 0
         });
+
+        _navigateToHomePage();
       } else {
         setState(() {
           _start--;
@@ -49,10 +51,19 @@ class _VotingPageState extends State<VotingPage> {
     });
   }
 
+  void _navigateToHomePage() {
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => const HomePage(),
+        ),
+        (route) => false);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
     _pageController.dispose();
+    updateUserHasVoted(UserConfig.userModel?.docId);
     super.dispose();
   }
 
@@ -69,7 +80,7 @@ class _VotingPageState extends State<VotingPage> {
               ? _pageController.previousPage(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut)
-              : Navigator.pop(context),
+              : _navigateToHomePage(),
         ),
         backgroundColor: const Color(0xFF00B0FF),
         titleTextStyle: const TextStyle(
@@ -115,17 +126,61 @@ class _VotingPageState extends State<VotingPage> {
           ),
         ),
         const SizedBox(
-            height: 40,
-            child: Text("Choose only one",
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25.0,
-                    fontWeight: FontWeight.w800))),
+          height: 40,
+          child: Text(
+            "Choose only one",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 25.0,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
         Expanded(
           child: ListView.builder(
-            itemCount: filteredCandidates.length,
-            itemBuilder: (context, index) =>
-                buildCandidateItem(context, filteredCandidates, index, page),
+            itemCount: filteredCandidates.length + 1,
+            itemBuilder: (context, index) {
+              if (index == filteredCandidates.length) {
+                return Center(
+                  child: MaterialButton(
+                    color: const Color(0xFF00B0FF),
+                    minWidth: 300,
+                    height: 60,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text("warning"),
+                            content: const Text("Are you sure?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {},
+                                child: const Text("Ok"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("Cancel"),
+                              )
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      "Submit",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        fontSize: 23.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return buildCandidateItem(
+                  context, filteredCandidates, index, page);
+            },
           ),
         ),
       ],
@@ -136,9 +191,16 @@ class _VotingPageState extends State<VotingPage> {
   Widget buildCandidateItem(BuildContext context,
       List<CandidateModel> candidates, int index, int page) {
     final candidate = candidates[index];
+    bool isSelected =
+        _selectedCandidates[_candidateTypes[page]!] == candidate.id;
+
     return Column(
       children: [
-        Image.network(candidate.info?.imageUrl ?? ''),
+        Image.network(
+          candidate.info?.imageUrl ?? '',
+          height: 400,
+          fit: BoxFit.fill,
+        ),
         Container(
           height: 50,
           alignment: Alignment.center,
@@ -149,18 +211,26 @@ class _VotingPageState extends State<VotingPage> {
                   fontWeight: FontWeight.w800)),
         ),
         MaterialButton(
-          color: const Color(0xFF00B0FF),
+          color: isSelected ? Colors.green : const Color(0xFF00B0FF),
           minWidth: 150,
           height: 50,
-          onPressed: () => voteForCandidate(context, candidate, page),
-          child: const Text(
-            "Vote",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 23.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          onPressed: () => setState(() {
+            if (isSelected) {
+              _selectedCandidates.remove(_candidateTypes[page]!);
+            } else {
+              _selectedCandidates[_candidateTypes[page]!] = candidate.id!;
+            }
+          }),
+          child: isSelected
+              ? const Icon(Icons.check, color: Colors.white)
+              : const Text(
+                  "Vote",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 23.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         const SizedBox(height: 24.0),
       ],
@@ -181,8 +251,7 @@ class _VotingPageState extends State<VotingPage> {
     // Navigate to the next candidate type or finish voting
     if ((page ?? 0) >= _candidateTypes.length - 1) {
       // This is the last candidate type, navigate to the HomePage or a voting completion page
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+      _navigateToHomePage();
     } else {
       // There are more candidate types to vote for, proceed to the next page
       _pageController.nextPage(
@@ -261,6 +330,4 @@ class _VotingPageState extends State<VotingPage> {
       log("Error updating user voting choice: $e");
     }
   }
-
-
 }

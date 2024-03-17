@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learn/bloc/security_check/security_check_cubit.dart';
 import 'package:learn/firebase_options.dart';
-import 'package:learn/landing_page.dart';
+import 'package:learn/security_check_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +25,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LandingPage(),
+      home: BlocProvider<SecurityCheckCubit>(
+        create: (_) => SecurityCheckCubit(),
+        child: const SecurityCheckScreen(),
+      ),
     );
   }
 }

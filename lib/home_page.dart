@@ -3,26 +3,47 @@ import 'package:flutter/material.dart';
 import 'package:learn/about_page.dart';
 import 'package:learn/config/user_config.dart';
 import 'package:learn/models/candidate_model.dart';
+import 'package:learn/models/user_model.dart';
 import 'package:learn/voting_intro_page.dart';
 import 'package:learn/voting_result_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('candidates').snapshots(),
+        stream: FirebaseFirestore.instance.collection('users').snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const CircularProgressIndicator();
+          if(snapshot.hasData && snapshot.data!.docs.isNotEmpty){
 
-          List<CandidateModel> candidates = snapshot.data!.docs
-              .map((doc) => CandidateModel.fromFirestore(doc))
-              .toList();
+            UserConfig.setUserModel(
+                UserModel.fromFirestore(snapshot.data!.docs.first));
+          }
 
-          return _buildBody(context, candidates);
+          return StreamBuilder<QuerySnapshot>(
+            stream:
+                FirebaseFirestore.instance.collection('candidates').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              List<CandidateModel> candidates = snapshot.data!.docs
+                  .map((doc) => CandidateModel.fromFirestore(doc))
+                  .toList();
+
+              return _buildBody(context, candidates);
+            },
+          );
         },
       ),
     );
@@ -55,29 +76,24 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 16.0),
         _buildButton(context, "About Candidate",
             () => AboutPage(candidates: candidates)),
-
         UserConfig.userModel?.hasVoted == false
             ? Column(
-
-              children: [
-                const SizedBox(height: 16.0),
-                _buildButton(
-                    context, "Vote", () => VotingIntroPage(candidates: candidates)),
-
-              ],
-            )
+                children: [
+                  const SizedBox(height: 16.0),
+                  _buildButton(context, "Vote",
+                      () => VotingIntroPage(candidates: candidates)),
+                ],
+              )
             : const SizedBox(),
-
         UserConfig.userModel?.hasVoted == true
             ? Column(
-              children: [
-                const SizedBox(height: 16.0),
-                _buildButton(
-                    context, "Show Result", () => const VotingResultPage()),
-              ],
-            )
+                children: [
+                  const SizedBox(height: 16.0),
+                  _buildButton(
+                      context, "Show Result", () => const VotingResultPage()),
+                ],
+              )
             : const SizedBox(),
-
       ],
     );
   }
