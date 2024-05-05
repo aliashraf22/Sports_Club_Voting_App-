@@ -15,9 +15,11 @@ class _VotingResultPageState extends State<VotingResultPage> {
   @override
   void initState() {
     super.initState();
-    fetchHighestVotedCandidates().then((data) {
-      setState(() {
-        highestVotedCandidates = data;
+    fetchCandidatesByCategory().then((candidatesByCategory) {
+      fetchHighestVotedCandidates(candidatesByCategory).then((data) {
+        setState(() {
+          highestVotedCandidates = data;
+        });
       });
     });
   }
@@ -56,7 +58,7 @@ class _VotingResultPageState extends State<VotingResultPage> {
     );
   }
 
-  Future<Map<String, CandidateModel>> fetchHighestVotedCandidates() async {
+  Future<Map<String, List<CandidateModel>>> fetchCandidatesByCategory() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('candidates').get();
     Map<String, List<CandidateModel>> candidatesByCategory = {};
@@ -69,6 +71,11 @@ class _VotingResultPageState extends State<VotingResultPage> {
           .add(candidate);
     }
 
+    return candidatesByCategory;
+  }
+
+  Future<Map<String, CandidateModel>> fetchHighestVotedCandidates(
+      Map<String, List<CandidateModel>> candidatesByCategory) async {
     // Find the highest-voted candidate in each category
     Map<String, CandidateModel> highestVotedCandidates = {};
     candidatesByCategory.forEach((category, candidates) {
