@@ -7,6 +7,7 @@ class UserModel {
     this.hashedPassword,
     this.hasVoted,
     this.voteTimestamp,
+    this.isAdmin,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -16,8 +17,9 @@ class UserModel {
       docId: doc.id,
       userId: data['userId'],
       hashedPassword: data['hashedPassword'],
-        hasVoted: data['hasVoted'] ?? false,
+      hasVoted: data['hasVoted'] ?? false,
       voteTimestamp: data['voteTimestamp'].toString(),
+      isAdmin: data['isAdmin'] ?? false,
     );
   }
 
@@ -26,6 +28,7 @@ class UserModel {
   String? hashedPassword;
   bool? hasVoted;
   String? voteTimestamp;
+  bool? isAdmin;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -34,6 +37,7 @@ class UserModel {
     map['hashedPassword'] = hashedPassword;
     map['hasVoted'] = hasVoted ?? false;
     map['voteTimestamp'] = voteTimestamp;
+    map['isAdmin'] = isAdmin;
     return map;
   }
 }

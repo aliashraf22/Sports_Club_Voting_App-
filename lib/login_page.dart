@@ -37,8 +37,8 @@ class FormExample extends StatefulWidget {
 
 class _FormExampleState extends State<FormExample> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _userIdController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _userIdController = TextEditingController(text: '1234');
+  final TextEditingController _passwordController = TextEditingController(text: '12345678');
 
   @override
   Widget build(BuildContext context) {

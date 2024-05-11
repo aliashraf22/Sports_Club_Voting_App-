@@ -1,92 +1,74 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:learn/models/candidate_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learn/models/candidate_model.dart'; // Make sure this matches the correct path for the model
 
 class VotingResultPage extends StatefulWidget {
-  const VotingResultPage({super.key});
+  const VotingResultPage({Key? key}) : super(key: key);
 
   @override
   State<VotingResultPage> createState() => _VotingResultPageState();
 }
 
 class _VotingResultPageState extends State<VotingResultPage> {
-  Map<String, CandidateModel>? highestVotedCandidates;
+  Future<Map<String, List<CandidateModel>>>? candidatesByCategory;
 
   @override
   void initState() {
     super.initState();
-    fetchCandidatesByCategory().then((candidatesByCategory) {
-      fetchHighestVotedCandidates(candidatesByCategory).then((data) {
-        setState(() {
-          highestVotedCandidates = data;
-        });
-      });
-    });
+    candidatesByCategory = fetchCandidatesByCategory();
+  }
+
+  Future<Map<String, List<CandidateModel>>> fetchCandidatesByCategory() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('candidates').get();
+    Map<String, List<CandidateModel>> candidates = {};
+    for (var doc in snapshot.docs) {
+      CandidateModel candidate = CandidateModel.fromFirestore(doc);
+      String type = candidate.type ?? 'Unknown';
+      candidates.putIfAbsent(type, () => []).add(candidate);
+    }
+    return candidates;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          toolbarHeight: 47,
-          title: const Text(
-            "Votage",
-            textAlign: TextAlign.start,
-          ),
-          centerTitle: true,
-          backgroundColor: const Color(0xFF00B0FF),
-          titleTextStyle: const TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
-              fontSize: 32.0,
-              fontWeight: FontWeight.w600)),
-      body: highestVotedCandidates != null
-          ? ListView.builder(
-              itemCount: highestVotedCandidates?.length,
-              itemBuilder: (context, index) {
-                String? category =
-                    highestVotedCandidates?.keys.elementAt(index);
-                CandidateModel candidate = highestVotedCandidates![category]!;
-                return ListTile(
-                  leading: Image.network(candidate.info?.imageUrl ?? '',
-                      width: 100, fit: BoxFit.cover),
-                  title: Text('${candidate.info?.name} - ${candidate.type}'),
-                  subtitle: Text('Votes: ${candidate.numberOfVotes}'),
-                );
-              },
-            )
-          : const Center(child: CircularProgressIndicator()),
+        title: const Text("Voting Results"),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF00B0FF),
+      ),
+      body: FutureBuilder<Map<String, List<CandidateModel>>>(
+        future: candidatesByCategory,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text("No data available"));
+          }
+          return ListView(
+            children: snapshot.data!.entries.map((entry) {
+              List<CandidateModel> sortedCandidates = entry.value;
+              sortedCandidates.sort((a, b) => b.numberOfVotes?.compareTo(a.numberOfVotes ?? 0) ?? 0);
+
+              int winnerCount = entry.key == "Member" ? 6 : entry.key == "Youth Member" ? 3 : 1;
+
+              return ExpansionTile(
+                title: Text(entry.key),
+                children: sortedCandidates.map((candidate) {
+                  bool isWinner = sortedCandidates.indexOf(candidate) < winnerCount;
+                  return ListTile(
+                    leading: Image.network(candidate.info?.imageUrl ?? '', width: 50, fit: BoxFit.cover),
+                    title: Text(candidate.info?.name ?? 'Unknown'),
+                    subtitle: Text('Votes: ${candidate.numberOfVotes}'),
+                    tileColor: isWinner ? Colors.lightGreen[100] : null, // Highlight winners
+                  );
+                }).toList(),
+              );
+            }).toList(),
+          );
+        },
+      ),
     );
-  }
-
-  Future<Map<String, List<CandidateModel>>> fetchCandidatesByCategory() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('candidates').get();
-    Map<String, List<CandidateModel>> candidatesByCategory = {};
-
-    // Organize candidates by category
-    for (var doc in snapshot.docs) {
-      final candidate = CandidateModel.fromFirestore(doc);
-      candidatesByCategory
-          .putIfAbsent(candidate.type ?? '', () => [])
-          .add(candidate);
-    }
-
-    return candidatesByCategory;
-  }
-
-  Future<Map<String, CandidateModel>> fetchHighestVotedCandidates(
-      Map<String, List<CandidateModel>> candidatesByCategory) async {
-    // Find the highest-voted candidate in each category
-    Map<String, CandidateModel> highestVotedCandidates = {};
-    candidatesByCategory.forEach((category, candidates) {
-      // Sort candidates by votes in descending order
-      candidates.sort(
-          (a, b) => b.numberOfVotes?.compareTo(a.numberOfVotes ?? 0) ?? 0);
-      final highestVoted = candidates.first;
-
-      highestVotedCandidates[category] = highestVoted;
-    });
-
-    return highestVotedCandidates;
   }
 }

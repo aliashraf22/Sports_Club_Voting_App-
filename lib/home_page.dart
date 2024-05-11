@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:learn/about_page.dart';
+import 'package:learn/admin_panel_page.dart';
 import 'package:learn/config/user_config.dart';
 import 'package:learn/models/candidate_model.dart';
 import 'package:learn/models/user_model.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
             UserConfig.setUserModel(UserModel.fromFirestore(snapshot.data!.docs
-                .where((user) =>user['userId'] == UserConfig.userModel?.userId)
+                .where((user) => user['userId'] == UserConfig.userModel?.userId)
                 .first));
           }
 
@@ -73,9 +74,20 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 25.0,
                 fontWeight: FontWeight.w800)),
         const SizedBox(height: 16.0),
+        UserConfig.userModel?.isAdmin == true
+            ? Column(
+                children: [
+                  const SizedBox(height: 16.0),
+                  _buildButton(
+                      context, "Admin Panel", () => const AdminPanelPage()),
+                ],
+              )
+            : const SizedBox(),
+        const SizedBox(height: 16.0),
         _buildButton(context, "About Candidate",
             () => AboutPage(candidates: candidates)),
-        UserConfig.userModel?.hasVoted == false
+        UserConfig.userModel?.hasVoted == false ||
+                UserConfig.userModel?.isAdmin == true
             ? Column(
                 children: [
                   const SizedBox(height: 16.0),

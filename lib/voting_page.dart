@@ -19,9 +19,11 @@ class VotingPage extends StatefulWidget {
 class _VotingPageState extends State<VotingPage> {
   final PageController _pageController = PageController();
   late List<String?> _candidateTypes;
-  final Map<String, String> _selectedCandidates = {};
+  final Map<String, CandidateModel> _selectedCandidates = {};
+  final List<CandidateModel> _members = [];
+  final List<CandidateModel> _youthMembers = [];
   Timer? _timer;
-  int _start = 300; // 300 seconds for 5 minutes
+  int _start = 600; // 600 seconds for 10 minutes
 
   @override
   void initState() {
@@ -103,6 +105,14 @@ class _VotingPageState extends State<VotingPage> {
     );
   }
 
+  bool _isMember(String? stringToCompare) {
+    return stringToCompare == "Member";
+  }
+
+  bool _isYouthMember(String? stringToCompare) {
+    return stringToCompare == "Youth Member";
+  }
+
   // Helper method to build each candidate page
   Widget buildCandidatePage(BuildContext context, int page) {
     List<CandidateModel> filteredCandidates = widget.candidates
@@ -123,11 +133,15 @@ class _VotingPageState extends State<VotingPage> {
                 fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(
+        SizedBox(
           height: 40,
           child: Text(
-            "Choose only one",
-            style: TextStyle(
+            _isMember(_candidateTypes[page])
+                ? "Choose Six Members"
+                : _isYouthMember(_candidateTypes[page])
+                    ? "Choose Three Youth Members"
+                    : "Choose Only One",
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 25.0,
               fontWeight: FontWeight.w800,
@@ -140,66 +154,110 @@ class _VotingPageState extends State<VotingPage> {
             itemBuilder: (context, index) {
               if (index == filteredCandidates.length) {
                 return Center(
-                  child: MaterialButton(
-                    color: const Color(0xFF00B0FF),
-                    minWidth: 300,
-                    height: 60,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text("warning"),
-                            content: const Text("Are you sure?"),
-                            actions: [
-                              TextButton(
-                                onPressed: ()  {
-                                  Navigator.pop(
-                                      context); // Close the dialog first
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(300, 60),
+                      backgroundColor: const Color(0xFF00B0FF),
+                    ),
+                    onPressed: !_enableSubmit(page)
+                        ? null
+                        : () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text("warning"),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text("Are you sure? You selected:"),
+                                      const SizedBox(height: 12.0),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: _isMember(
+                                                _candidateTypes[page])
+                                            ? _members
+                                                .map((e) =>
+                                                    Text(e.info?.name ?? ''))
+                                                .toList()
+                                            : _isYouthMember(
+                                                    _candidateTypes[page])
+                                                ? _youthMembers
+                                                    .map((e) => Text(
+                                                        e.info?.name ?? ''))
+                                                    .toList()
+                                                : _selectedCandidates.entries
+                                                    .map(
+                                                      (e) => Text(
+                                                        e.key ==
+                                                                _candidateTypes[
+                                                                    page]
+                                                            ? e.value.info
+                                                                    ?.name ??
+                                                                ''
+                                                            : '',
+                                                      ),
+                                                    )
+                                                    .toList(),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
 
-                                  // Assuming updateCandidateVote and updateUserVotingChoice are async methods
-                                  // that update your Firestore database with the new vote counts and choices
-                                  for (String candidateType
-                                      in _selectedCandidates.keys) {
-                                    String? candidateId =
-                                        _selectedCandidates[candidateType];
-                                    if (candidateId != null) {
-                                      // Find the candidate model from the list of candidates using the candidateId
-                                      CandidateModel? candidate =
-                                          widget.candidates.first;
+                                        if (_isMember(_candidateTypes[page])) {
+                                          for (CandidateModel candidate
+                                              in _members) {
+                                            updateCandidateVote(candidate);
+                                          }
+                                        } else if (_isYouthMember(
+                                            _candidateTypes[page])) {
+                                          for (CandidateModel candidate
+                                              in _youthMembers) {
+                                            updateCandidateVote(candidate);
+                                          }
+                                        } else {
+                                          CandidateModel? candidate =
+                                              _selectedCandidates[
+                                                  _candidateTypes[page]];
 
-                                      // Update the candidate's vote count
-                                       updateCandidateVote(candidate);
-                                    }
-                                  }
+                                          if (candidate != null) {
+                                            updateCandidateVote(candidate);
+                                          }
+                                        }
 
-                                  // Mark the user as having voted
-                                   updateUserHasVoted(
-                                      UserConfig.userModel?.docId);
+                                        updateUserHasVoted(
+                                            UserConfig.userModel?.docId);
 
-                                  if (page  >= _candidateTypes.length - 1) {
-                                    // This is the last candidate type, navigate to the HomePage or a voting completion page
-                                    _navigateToHomePage();
-                                  } else {
-                                    // There are more candidate types to vote for, proceed to the next page
-                                    _pageController.nextPage(
-                                        duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-                                  }
-                                },
-                                child: const Text("Ok"),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Cancel"),
-                              )
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    child: const Text(
-                      "Submit",
-                      style: TextStyle(
+                                        if (page >=
+                                            _candidateTypes.length - 1) {
+                                          _navigateToHomePage();
+                                        } else {
+                                          _pageController.nextPage(
+                                              duration: const Duration(
+                                                  milliseconds: 500),
+                                              curve: Curves.easeInOut);
+                                        }
+                                      },
+                                      child: const Text("Ok"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Cancel"),
+                                    )
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                    child: Text(
+                      page == _candidateTypes.length - 1 ? "Submit" : "Next",
+                      style: const TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                         fontSize: 23.0,
                         fontWeight: FontWeight.w600,
@@ -217,40 +275,47 @@ class _VotingPageState extends State<VotingPage> {
     );
   }
 
+  bool _enableSubmit(int page) {
+    if (_isMember(_candidateTypes[page])) {
+      return _members.length == 6;
+    } else if (_isYouthMember(_candidateTypes[page])) {
+      return _youthMembers.length == 3;
+    } else {
+      return _selectedCandidates[_candidateTypes[page]!] != null;
+    }
+  }
+
 // Helper method to build each candidate item
   Widget buildCandidateItem(BuildContext context,
       List<CandidateModel> candidates, int index, int page) {
-    final candidate = candidates[index];
-    bool isSelected =
-        _selectedCandidates[_candidateTypes[page]!] == candidate.id;
+    final CandidateModel candidate = candidates[index];
+    final String? type = candidate.type;
+    bool isSelected = _isSelected(candidate, type, page);
 
     return Column(
       children: [
         Image.network(
           candidate.info?.imageUrl ?? '',
           height: 400,
+          width: double.maxFinite,
           fit: BoxFit.fill,
         ),
         Container(
           height: 50,
           alignment: Alignment.center,
-          child: Text(candidate.info?.name ?? '',
-              style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.w800)),
+          child: Text(
+            candidate.info?.name ?? 'Unknown',
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 25.0,
+                fontWeight: FontWeight.w800),
+          ),
         ),
         MaterialButton(
           color: isSelected ? Colors.green : const Color(0xFF00B0FF),
           minWidth: 150,
           height: 50,
-          onPressed: () => setState(() {
-            if (isSelected) {
-              _selectedCandidates.remove(_candidateTypes[page]!);
-            } else {
-              _selectedCandidates[_candidateTypes[page]!] = candidate.id!;
-            }
-          }),
+          onPressed: () => _toggleCandidateSelection(candidate, type, page),
           child: isSelected
               ? const Icon(Icons.check, color: Colors.white)
               : const Text(
@@ -265,6 +330,54 @@ class _VotingPageState extends State<VotingPage> {
         const SizedBox(height: 24.0),
       ],
     );
+  }
+
+  bool _isSelected(CandidateModel candidate, String? type, int page) {
+    if (_isMember(type)) {
+      return _members.contains(candidate);
+    } else if (_isYouthMember(type)) {
+      return _youthMembers.contains(candidate);
+    }
+    return _selectedCandidates[_candidateTypes[page]!]?.id == candidate.id;
+  }
+
+  void _toggleCandidateSelection(
+      CandidateModel candidate, String? type, int page) {
+    setState(() {
+      if (_isSelected(candidate, type, page)) {
+        if (_isMember(type)) {
+          _members.remove(candidate);
+        } else if (_isYouthMember(type)) {
+          _youthMembers.remove(candidate);
+        } else {
+          _selectedCandidates.remove(type);
+        }
+      } else {
+        if (_canAddCandidate(type)) {
+          if (_isMember(type)) {
+            _members.add(candidate);
+          } else if (_isYouthMember(type)) {
+            _youthMembers.add(candidate);
+          } else {
+            _selectedCandidates[type!] = candidate;
+          }
+        }
+      }
+    });
+  }
+
+  bool _canAddCandidate(String? type) {
+    int limit = type == "Member"
+        ? 6
+        : type == "Youth Member"
+            ? 3
+            : 1;
+    List<CandidateModel> selectedList = _isMember(type)
+        ? _members
+        : _isYouthMember(type)
+            ? _youthMembers
+            : [];
+    return selectedList.length < limit;
   }
 
   void voteForCandidate(
