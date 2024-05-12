@@ -7,7 +7,7 @@ class SecurityMonitoringService {
     bool isSimulated = await _checkIfDeviceIsSimulated();
     bool isDeveloper = await _checkIfDeveloperOptionsEnabled();
 
-    return (isRooted || isSimulated || isDeveloper);
+    return !(isRooted || isSimulated || isDeveloper);
   }
 
   static Future<bool> _checkIfDeviceIsRooted() async {

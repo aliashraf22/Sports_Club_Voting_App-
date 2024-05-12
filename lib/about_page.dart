@@ -9,8 +9,13 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String?> candidateTypes =
-        candidates.map((candidate) => candidate.type).toSet().toList();
+    List<String?> candidateTypes = [
+      'President',
+      'Vice President',
+      'Club Treasury',
+      'Member',
+      'Youth Member',
+    ];
 
     return Scaffold(
       appBar: AppBar(

@@ -30,8 +30,13 @@ class _VotingPageState extends State<VotingPage> {
     super.initState();
     _startTimer();
 
-    _candidateTypes =
-        widget.candidates.map((candidate) => candidate.type).toSet().toList();
+    _candidateTypes = [
+      'President',
+      'Vice President',
+      'Club Treasury',
+      'Member',
+      'Youth Member',
+    ];
   }
 
   void _startTimer() {
@@ -153,117 +158,169 @@ class _VotingPageState extends State<VotingPage> {
             itemCount: filteredCandidates.length + 1,
             itemBuilder: (context, index) {
               if (index == filteredCandidates.length) {
-                return Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(300, 60),
-                      backgroundColor: const Color(0xFF00B0FF),
-                    ),
-                    onPressed: !_enableSubmit(page)
-                        ? null
-                        : () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text("warning"),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Are you sure? You selected:"),
-                                      const SizedBox(height: 12.0),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: _isMember(
-                                                _candidateTypes[page])
-                                            ? _members
-                                                .map((e) =>
-                                                    Text(e.info?.name ?? ''))
-                                                .toList()
-                                            : _isYouthMember(
-                                                    _candidateTypes[page])
-                                                ? _youthMembers
-                                                    .map((e) => Text(
-                                                        e.info?.name ?? ''))
-                                                    .toList()
-                                                : _selectedCandidates.entries
-                                                    .map(
-                                                      (e) => Text(
-                                                        e.key ==
-                                                                _candidateTypes[
-                                                                    page]
-                                                            ? e.value.info
-                                                                    ?.name ??
-                                                                ''
-                                                            : '',
-                                                      ),
-                                                    )
-                                                    .toList(),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-
-                                        if (_isMember(_candidateTypes[page])) {
-                                          for (CandidateModel candidate
-                                              in _members) {
-                                            updateCandidateVote(candidate);
-                                          }
-                                        } else if (_isYouthMember(
-                                            _candidateTypes[page])) {
-                                          for (CandidateModel candidate
-                                              in _youthMembers) {
-                                            updateCandidateVote(candidate);
-                                          }
-                                        } else {
-                                          CandidateModel? candidate =
-                                              _selectedCandidates[
-                                                  _candidateTypes[page]];
-
-                                          if (candidate != null) {
-                                            updateCandidateVote(candidate);
-                                          }
-                                        }
-
-                                        updateUserHasVoted(
-                                            UserConfig.userModel?.docId);
-
-                                        if (page >=
-                                            _candidateTypes.length - 1) {
-                                          _navigateToHomePage();
-                                        } else {
-                                          _pageController.nextPage(
-                                              duration: const Duration(
-                                                  milliseconds: 500),
-                                              curve: Curves.easeInOut);
-                                        }
-                                      },
-                                      child: const Text("Ok"),
+                return Column(
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(300, 60),
+                        backgroundColor: const Color(0xFF00B0FF),
+                      ),
+                      onPressed: !_enableSubmit(page)
+                          ? null
+                          : () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text("warning"),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                            "Are you sure? You selected:"),
+                                        const SizedBox(height: 12.0),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: _isMember(
+                                                  _candidateTypes[page])
+                                              ? _members
+                                                  .map((e) =>
+                                                      Text(e.info?.name ?? ''))
+                                                  .toList()
+                                              : _isYouthMember(
+                                                      _candidateTypes[page])
+                                                  ? _youthMembers
+                                                      .map((e) => Text(
+                                                          e.info?.name ?? ''))
+                                                      .toList()
+                                                  : _selectedCandidates.entries
+                                                      .map(
+                                                        (e) => Text(
+                                                          e.key ==
+                                                                  _candidateTypes[
+                                                                      page]
+                                                              ? e.value.info
+                                                                      ?.name ??
+                                                                  ''
+                                                              : '',
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                        ),
+                                      ],
                                     ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Cancel"),
-                                    )
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                    child: Text(
-                      page == _candidateTypes.length - 1 ? "Submit" : "Next",
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        fontSize: 23.0,
-                        fontWeight: FontWeight.w600,
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+
+                                          if (_isMember(
+                                              _candidateTypes[page])) {
+                                            for (CandidateModel candidate
+                                                in _members) {
+                                              updateCandidateVote(candidate);
+                                            }
+                                          } else if (_isYouthMember(
+                                              _candidateTypes[page])) {
+                                            for (CandidateModel candidate
+                                                in _youthMembers) {
+                                              updateCandidateVote(candidate);
+                                            }
+                                          } else {
+                                            CandidateModel? candidate =
+                                                _selectedCandidates[
+                                                    _candidateTypes[page]];
+
+                                            if (candidate != null) {
+                                              updateCandidateVote(candidate);
+                                            }
+                                          }
+
+                                          updateUserHasVoted(
+                                              UserConfig.userModel?.docId);
+
+                                          if (page >=
+                                              _candidateTypes.length - 1) {
+                                            _navigateToHomePage();
+                                          } else {
+                                            _pageController.nextPage(
+                                                duration: const Duration(
+                                                    milliseconds: 500),
+                                                curve: Curves.easeInOut);
+                                          }
+                                        },
+                                        child: const Text("Ok"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Cancel"),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                      child: Text(
+                        page == _candidateTypes.length - 1 ? "Submit" : "Next",
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 23.0,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(300, 60),
+                        backgroundColor: const Color(0xFF00B0FF),
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text("warning"),
+                              content:
+                                  const Text("Are you sure skip this step?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+
+                                    if (page >= _candidateTypes.length - 1) {
+                                      _navigateToHomePage();
+                                    } else {
+                                      _pageController.nextPage(
+                                          duration:
+                                              const Duration(milliseconds: 500),
+                                          curve: Curves.easeInOut);
+                                    }
+                                  },
+                                  child: const Text("Ok"),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Cancel"),
+                                )
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 23.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               }
               return buildCandidateItem(
